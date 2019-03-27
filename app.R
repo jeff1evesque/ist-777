@@ -22,3 +22,8 @@ library('customUtility')
 
 ## load packages
 load_package(c())
+
+## load dataset
+allSchoolsReportStatus = read.csv(paste0(cwd, '/data/allSchoolsReportStatus.csv'))
+reportSample = read.csv(paste0(cwd, '/data/reportSample.csv'))
+usVaccines = read.csv(paste0(cwd, '/data/usVaccines.csv'))
