@@ -1,18 +1,15 @@
-##
-## app.R
-##
-if (nzchar(Sys.getenv('RSTUDIO_USER_IDENTITY'))) {
-  if (!require('rstudioapi')) install.packages('rstudioapi')
-  library('rstudioapi')
-}
+---
+title: 'IST 777: final project'
+output:
+  word_document: default
+#  pdf_document: default
+subtitle: Jeff Levesque
+always_allow_html: yes
+---
 
-## set project cwd: only execute in RStudio
-if (nzchar(Sys.getenv('RSTUDIO_USER_IDENTITY'))) {
-  cwd = dirname(rstudioapi::getSourceEditorContext()$path)
-  setwd(cwd)
-} else {
-  cwd = getwd()
-}
+```{r setup, include=FALSE}
+## local variables
+cwd = getwd()
 
 ## utility functions
 if (!require('devtools')) install.packages('devtools', repos='http://cloud.r-project.org')
@@ -21,9 +18,10 @@ devtools::install_local(paste0(cwd, '/packages/customUtility'))
 library('customUtility')
 
 ## load packages
-load_package(c())
+load_package(c('knitr', 'rmarkdown'))
 
 ## load dataset
 allSchoolsReportStatus = read.csv(paste0(cwd, '/data/allSchoolsReportStatus.csv'))
 reportSample = read.csv(paste0(cwd, '/data/reportSample.csv'))
 usVaccines = read.csv(paste0(cwd, '/data/usVaccines.csv'))
+```
