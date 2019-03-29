@@ -1,23 +1,13 @@
 ---
 title: 'IST 777: final project'
 output:
-  pdf_document:
-    toc: yes
-subtitle: 'Jeff Levesque'
+  word_document: default
+#  pdf_document: default
+subtitle: Jeff Levesque
 always_allow_html: yes
 ---
 
 ```{r setup, include=FALSE}
-##
-## install pdf
-##
-## Note: 'knitr' may need to be manually uninstalled.
-##
-install.packages('rmarkdown', repos='http://cran.us.r-project.org')
-install.packages('tinytex', repos='http://cran.us.r-project.org')
-library(rmarkdown)
-tinytex::install_tinytex()
-
 ## local variables
 cwd = getwd()
 
@@ -28,7 +18,7 @@ devtools::install_local(paste0(cwd, '/packages/customUtility'))
 library('customUtility')
 
 ## load packages
-load_package(c('tinytex'))
+load_package(c('knitr', 'rmarkdown'))
 
 ## load dataset
 allSchoolsReportStatus = read.csv(paste0(cwd, '/data/allSchoolsReportStatus.csv'))
