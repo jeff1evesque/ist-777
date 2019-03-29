@@ -25,3 +25,27 @@ allSchoolsReportStatus = read.csv(paste0(cwd, '/data/allSchoolsReportStatus.csv'
 reportSample = read.csv(paste0(cwd, '/data/reportSample.csv'))
 usVaccines = read.csv(paste0(cwd, '/data/usVaccines.csv'))
 ```
+
+Proportion of public schools reported vaccination data:
+
+```{r}
+library('ggplot2')
+ggplot(
+  allSchoolsReportStatus,
+  aes(x=reported)
+) +
+geom_histogram(stat='count')
+```
+
+Most vaccinations have stabilized. However, it appears that `HepB_BD` vacinations started much recently, and may require additional time to stabilize:
+
+```{r}
+library('reshape2')
+df.m = melt(usVaccines,id='X')
+ggplot(
+  data = df.m, aes(x=X,y=value,colour=variable,group=variable)
+) +
+  geom_line()
+```
+
+In general the vacination rates reported by the World Health Organization for the United States, have a tendency to fluctuate initially. After some time, the rates seem to stabilize between 85 and 100. Furthermore, the `HepB_BD` rates does not show similar values, nor stability. Rather, the vacaination endured a large growth period, then a decline. It is unknown whether the rates have stabilized, or future volatility could occur.
