@@ -61,3 +61,41 @@ ggplot(
 ```
 
 In general the vacination rates reported by the World Health Organization for the United States, have a tendency to fluctuate initially. After some time, the rates seem to stabilize between 85 and 100. Furthermore, the `HepB_BD` rates does not show similar values, nor stability. Rather, the vacination endured a large growth period, then a decline. It is unknown whether the rates have stabilized, or future volatility could occur.
+
+```{r}
+data = subset(usVaccines, select = -c(X))
+
+Pol3.ts = ts(usVaccines$Pol3, frequency = 4)
+Pol3.decompose = decompose(Pol3.ts, 'additive')
+plot(Pol3.decompose)
+```
+
+
+```{r}
+##
+## https://stackoverflow.com/a/43054751
+##
+plot.decomposed.ts = function(x, title='') {
+  xx = x$x
+  if (is.null(xx))
+    xx = with(x, if (type == 'additive')
+      random + trend + seasonal
+      else random * trend * seasonal)
+  plot(
+    cbind(
+      observed = xx,
+      trend = x$trend,
+      seasonal = x$seasonal,
+      random = x$random
+    ),
+    main=title
+  )
+}
+
+data = subset(usVaccines, select = -c(X))
+for(col in names(data)) {
+  data.ts = ts(usVaccines[[col]], frequency = 4)
+  data.decompose = decompose(data.ts, 'additive')
+  plot.decomposed.ts(data.decompose, col)
+}
+```
