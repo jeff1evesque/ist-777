@@ -7,6 +7,8 @@ subtitle: Jeff Levesque
 always_allow_html: yes
 ---
 
+# Introductory / Descriptive Reports
+
 ```{r setup, include=FALSE}
 ## local variables
 cwd = getwd()
@@ -61,6 +63,8 @@ ggplot(
 ```
 
 In general the vacination rates reported by the World Health Organization for the United States, have a tendency to fluctuate initially. After some time, the rates seem to stabilize between 85 and 100. Furthermore, the `HepB_BD` rates does not show similar values, nor stability. Rather, the vacination endured a large growth period, then a decline. It is unknown whether the rates have stabilized, or future volatility could occur.
+
+When using time series decomposition, with a `frequency=4`, there appears to be seasonal patterns for all vacination types. However, the trends are not consistent nor similar between the different vacination types.
 
 ```{r}
 ##
