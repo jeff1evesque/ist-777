@@ -26,7 +26,7 @@ reportSample = read.csv(paste0(cwd, '/data/reportSample.csv'))
 usVaccines = read.csv(paste0(cwd, '/data/usVaccines.csv'))
 ```
 
-Proportion of public schools reported vaccination data:
+The combined proportion of private and public schools reporting vaccination data:
 
 ```{r}
 library('ggplot2')
@@ -34,6 +34,18 @@ ggplot(
   allSchoolsReportStatus,
   aes(x=reported)
 ) +
+geom_histogram(stat='count')
+```
+
+The proportion of private and public schools reporting vaccination data:
+
+```{r}
+library('ggplot2')
+ggplot(
+  allSchoolsReportStatus,
+  aes(x=reported)
+) +
+facet_grid(~pubpriv) +
 geom_histogram(stat='count')
 ```
 
@@ -48,4 +60,4 @@ ggplot(
   geom_line()
 ```
 
-In general the vacination rates reported by the World Health Organization for the United States, have a tendency to fluctuate initially. After some time, the rates seem to stabilize between 85 and 100. Furthermore, the `HepB_BD` rates does not show similar values, nor stability. Rather, the vacaination endured a large growth period, then a decline. It is unknown whether the rates have stabilized, or future volatility could occur.
+In general the vacination rates reported by the World Health Organization for the United States, have a tendency to fluctuate initially. After some time, the rates seem to stabilize between 85 and 100. Furthermore, the `HepB_BD` rates does not show similar values, nor stability. Rather, the vacination endured a large growth period, then a decline. It is unknown whether the rates have stabilized, or future volatility could occur.
