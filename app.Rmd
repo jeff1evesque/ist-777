@@ -7,6 +7,8 @@ subtitle: Jeff Levesque
 always_allow_html: yes
 ---
 
+# Introductory / Descriptive Reports
+
 ```{r setup, include=FALSE}
 ## local variables
 cwd = getwd()
@@ -24,4 +26,73 @@ load_package(c('knitr', 'rmarkdown'))
 allSchoolsReportStatus = read.csv(paste0(cwd, '/data/allSchoolsReportStatus.csv'))
 reportSample = read.csv(paste0(cwd, '/data/reportSample.csv'))
 usVaccines = read.csv(paste0(cwd, '/data/usVaccines.csv'))
+```
+
+The combined proportion of private and public schools reporting vaccination data:
+
+```{r}
+library('ggplot2')
+ggplot(
+  allSchoolsReportStatus,
+  aes(x=reported)
+) +
+geom_histogram(stat='count')
+```
+
+The proportion of private and public schools reporting vaccination data:
+
+```{r}
+library('ggplot2')
+ggplot(
+  allSchoolsReportStatus,
+  aes(x=reported)
+) +
+facet_grid(~pubpriv) +
+geom_histogram(stat='count')
+```
+
+Most vaccinations have stabilized. However, it appears that `HepB_BD` vacinations started much recently, and may require additional time to stabilize:
+
+```{r}
+library('reshape2')
+df.m = melt(usVaccines,id='X')
+ggplot(
+  data = df.m, aes(x=X,y=value,colour=variable,group=variable)
+) +
+  geom_line()
+```
+
+In general the vacination rates reported by the World Health Organization for the United States, have a tendency to fluctuate initially. After some time, the rates seem to stabilize between 85 and 100. Furthermore, the `HepB_BD` rates does not show similar values, nor stability. Rather, the vacination endured a large growth period, then a decline. It is unknown whether the rates have stabilized, or future volatility could occur.
+
+When using time series decomposition, with a `frequency=4`, there appears to be seasonal patterns for all vacination types. However, the trends are not consistent nor similar between the different vacination types.
+
+```{r}
+##
+## custom decompose: allows custom title
+##
+## Note: https://stackoverflow.com/a/43054751
+##
+plot.decomposed.ts = function(x, title='') {
+  xx = x$x
+  if (is.null(xx))
+    xx = with(x, if (type == 'additive')
+      random + trend + seasonal
+      else random * trend * seasonal)
+  plot(
+    cbind(
+      observed = xx,
+      trend = x$trend,
+      seasonal = x$seasonal,
+      random = x$random
+    ),
+    main=title
+  )
+}
+
+data = subset(usVaccines, select = -c(X))
+for(col in names(data)) {
+  data.ts = ts(usVaccines[[col]], frequency = 4)
+  data.decompose = decompose(data.ts, 'additive')
+  plot.decomposed.ts(data.decompose, col)
+}
 ```
