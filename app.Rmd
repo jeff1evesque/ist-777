@@ -106,13 +106,24 @@ for(col in names(data)) {
 
 There is no credible difference in overall reporting between public and private schools.
 
+### Frequentist t-test
+
+```{r}
+t.test(
+  x=allSchoolsReportStatus[allSchoolsReportStatus$pubpriv=='PUBLIC', 1],
+  y=allSchoolsReportStatus[allSchoolsReportStatus$pubpriv=='PRIVATE', 1]
+)
+```
+
+### Bayes Factor
+
 ```{r}
 library('BEST')
 library('BayesFactor')
 
 schoolReportOut = BESTmcmc(
-  allSchoolsReportStatus[allSchoolsReportStatus$pubpriv=='PUBLIC', 1],
-  allSchoolsReportStatus[allSchoolsReportStatus$pubpriv=='PRIVATE', 1],
+  allSchoolsReportStatus['reported'][allSchoolsReportStatus$pubpriv=='PUBLIC', 1],
+  allSchoolsReportStatus['reported'][allSchoolsReportStatus$pubpriv=='PRIVATE', 1],
   numSavedSteps=1000
 )
 
@@ -120,7 +131,26 @@ summary(schoolReportOut)
 plot(schoolReportOut)
 ```
 
+### HDI
+
+```{r}
+hist(schoolReportOut)
+abline(v=quantile(schoolReportOut, c(0.025)), col='green')
+abline(v=quantile(schoolReportOut, c(0.975)), col='green')
+```
+
 ## Overall vaccination rates between public and private schools
+
+### Frequentist: t-test
+
+```{r}
+t.test(
+  x=reportSample$allvaccs[reportSample$pubpriv == 'PUBLIC'],
+  y=reportSample$allvaccs[reportSample$pubpriv == 'PRIVATE']
+)
+```
+
+### Bayes Factor
 
 ```{r}
 allVacsOut = anovaBF(
@@ -133,7 +163,26 @@ summary(mcmcOut)
 plot(mcmcOut)
 ```
 
+### HDI
+
+```{r}
+hist(mcmcOut)
+abline(v=quantile(mcmcOut, c(0.025)), col='green')
+abline(v=quantile(mcmcOut, c(0.975)), col='green')
+```
+
 ## Medical exemptions between public and private schools
+
+### Frequentist: t-test
+
+```{r}
+t.test(
+  x=reportSample$medical[reportSample$pubpriv == 'PUBLIC'],
+  y=reportSample$medical[reportSample$pubpriv == 'PRIVATE']
+)
+```
+
+### Bayes Factor
 
 ```{r}
 medicalExOut = anovaBF(
@@ -146,7 +195,26 @@ summary(mcmcOut)
 plot(mcmcOut)
 ```
 
+### HDI
+
+```{r}
+hist(mcmcOut)
+abline(v=quantile(mcmcOut, c(0.025)), col='green')
+abline(v=quantile(mcmcOut, c(0.975)), col='green')
+```
+
 ## Religious/belief exemptions between public and private schools
+
+### Frequentist: t-test
+
+```{r}
+t.test(
+  x=reportSample$religious[reportSample$pubpriv == 'PUBLIC'],
+  y=reportSample$religious[reportSample$pubpriv == 'PRIVATE']
+)
+```
+
+### Bayes Factor
 
 ```{r}
 religiousOut = anovaBF(
@@ -157,4 +225,12 @@ summary(religiousOut)
 mcmcOut = posterior(religiousOut, iterations=1000)
 summary(mcmcOut)
 plot(mcmcOut)
+```
+
+### HDI
+
+```{r}
+hist(mcmcOut)
+abline(v=quantile(mcmcOut, c(0.025)), col='green')
+abline(v=quantile(mcmcOut, c(0.975)), col='green')
 ```
