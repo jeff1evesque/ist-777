@@ -115,7 +115,7 @@ t.test(
 )
 ```
 
-### Bayes Factor
+### Bayes Factor (with HDI)
 
 ```{r}
 library('BEST')
@@ -129,14 +129,6 @@ schoolReportOut = BESTmcmc(
 
 summary(schoolReportOut)
 plot(schoolReportOut)
-```
-
-### HDI
-
-```{r}
-hist(schoolReportOut)
-abline(v=quantile(schoolReportOut, c(0.025)), col='green')
-abline(v=quantile(schoolReportOut, c(0.975)), col='green')
 ```
 
 ## Overall vaccination rates between public and private schools
@@ -160,15 +152,15 @@ allVacsOut = anovaBF(
 summary(allVacsOut)
 mcmcOut = posterior(allVacsOut, iterations=1000)
 summary(mcmcOut)
-plot(mcmcOut)
+plot(mcmcOut[,'mu'])
 ```
 
 ### HDI
 
 ```{r}
-hist(mcmcOut)
-abline(v=quantile(mcmcOut, c(0.025)), col='green')
-abline(v=quantile(mcmcOut, c(0.975)), col='green')
+hist(mcmcOut[,'allvaccs'])
+abline(v=quantile(mcmcOut[,'allvaccs'], c(0.025)), col='green')
+abline(v=quantile(mcmcOut[,'allvaccs'], c(0.975)), col='green')
 ```
 
 ## Medical exemptions between public and private schools
@@ -192,15 +184,15 @@ medicalExOut = anovaBF(
 summary(medicalExOut)
 mcmcOut = posterior(medicalExOut, iterations=1000)
 summary(mcmcOut)
-plot(mcmcOut)
+plot(mcmcOut[,'mu'])
 ```
 
 ### HDI
 
 ```{r}
-hist(mcmcOut)
-abline(v=quantile(mcmcOut, c(0.025)), col='green')
-abline(v=quantile(mcmcOut, c(0.975)), col='green')
+hist(mcmcOut[,'medical'])
+abline(v=quantile(mcmcOut[,'medical'], c(0.025)), col='green')
+abline(v=quantile(mcmcOut[,'medical'], c(0.975)), col='green')
 ```
 
 ## Religious/belief exemptions between public and private schools
@@ -224,7 +216,7 @@ religiousOut = anovaBF(
 summary(religiousOut)
 mcmcOut = posterior(religiousOut, iterations=1000)
 summary(mcmcOut)
-plot(mcmcOut)
+plot(mcmcOut[,'mu'])
 ```
 
 ### HDI
