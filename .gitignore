@@ -1,2 +1,6 @@
 ## ignore files
 /**/*.pdf
+/app.docx
+/app.tex
+/app_files/
+
