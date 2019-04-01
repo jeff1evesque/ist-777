@@ -432,6 +432,10 @@ In an attempt to investigate the above coefficients, a chi-squared test was impl
 anova(conditional, test='Chisq')
 ```
 
+## Big picture
+
 ## Sources
 
 * https://freakonometrics.hypotheses.org/8210
+* https://stats.idre.ucla.edu/r/dae/logit-regression/
+* https://statistics.laerd.com/statistical-guides/one-way-anova-statistical-guide.php
