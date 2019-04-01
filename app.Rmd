@@ -434,8 +434,25 @@ anova(conditional, test='Chisq')
 
 ## Big picture
 
+Based on the earlier analysis, the logistic regression for predicting the `pubpriv` case on condition, was not a good model since none of the independent variables were significant. Furthemore, the corresponding diagnostic tools, such as the Residuals vs. Predicted indicated that the logistic model overpredicted.
+
+Moreover, the percentage of students requiring a follow-up on vaccination records (i.e. conditional), were statistically significant with all factors, except `hepMiss`. Hepatitis vaccination is generally recommended by the CDC to infants between 6-23 months of age. Once a child has been provided treatment, this vaccine generally lasts a minimum of 10 years (hepA), and 20 years (hepB). This suggests if an infant receives proper vaccination shortly after birth, hepatitis should not be a problem through elementary school years.
+
+Students with a religious/belief exemptions, were statistically significant with all factors, except `polMiss` and `mmrMiss`. Though early ideologies, including protest of the polio vaccine being created from animals may have existed, consistent state regulations have likely made this a nonsignificant issue today. Specifically, polio vaccinations is required by all 50 states and DC for children entering childcare and public school. Furthermore, religious/belief exemptions allowed students to avoid Measles/Mumps/Rubella vaccinations. However, in recent years, an alarming proportion of outbreaks have encouraged the removal of the exemption. State legislatures in New Jersey, New York, Iowa, Maine, and Vermont have proposed the removal of this exemption. Since polio vaccination is required by all states, this is equally non-significant as being able to avoid mmr vaccination altogether.
+
+Finally, the percentage of student with a medical exemption was statistically significant with all factors except `varMiss`. Similar to the polio vaccination,  Varicella (i.e. chicken pox) vaccination is required by all 50 states including DC for all children entering childcare or public schools.
+
+In general, the earlier analysis is a depiction on current societal beliefs, as well as a mirror representation of state laws and guidelines. It will be interesting in recent light, whether state legislatures in New Jersey, New York, Iowa, Maine, and Vermont, will be able to set a precedence among other states. Since ideologies are often re-evaluated - one may ask, should religious belief exempt an infant or child from receiving the best possible health option? Furthemore, religious convictions of one individual or family can jeopardize the health of another. Thus, such discussions and analysis is a fundamental journey to improving the overall health of a society.
+
 ## Sources
 
 * https://freakonometrics.hypotheses.org/8210
 * https://stats.idre.ucla.edu/r/dae/logit-regression/
 * https://statistics.laerd.com/statistical-guides/one-way-anova-statistical-guide.php
+* https://www.webmd.com/a-to-z-guides/prevention-15/vaccines/need-hepatitis-vaccines
+* https://www.cdc.gov/hepatitis/hav/havfaq.htm
+* https://www.cdc.gov/features/hepatitis-b-vaccine/index.html
+* https://www.washingtonpost.com/religion/2019/02/21/some-anti-vaccination-parents-cite-religious-exemptions-measles-outbreaks-could-change-that/?utm_term=.d5c3ebef9153
+* https://www.cdc.gov/vaccines/vpd/polio/public/index.html
+* https://wwwnc.cdc.gov/eid/article/15/6/09-0087_article
+* https://www.cdc.gov/vaccines/vpd-vac/varicella/basic-school-daycare-req.htm
