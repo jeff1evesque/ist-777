@@ -26,6 +26,9 @@ load_package(c('knitr', 'rmarkdown', 'BEST'))
 allSchoolsReportStatus = read.csv(paste0(cwd, '/data/allSchoolsReportStatus.csv'))
 reportSample = read.csv(paste0(cwd, '/data/reportSample.csv'))
 usVaccines = read.csv(paste0(cwd, '/data/usVaccines.csv'))
+
+## set seed
+set.seed(777)
 ```
 
 ## Proportion of overall schools reported vaccination data
@@ -48,6 +51,21 @@ ggplot(
 ) +
 facet_grid(~pubpriv) +
 geom_histogram(stat='count')
+```
+
+A significant proportion of public schools have reported more vaccinations than private school. Moreover, both schools who have not reported vaccinations, represent a very small marginal total:
+
+```{r}
+contingency = table(
+  allSchoolsReportStatus$reported,
+  allSchoolsReportStatus$pubpriv
+)
+
+rowSums(contingency)
+colSums(contingency)
+
+contingency
+prop.table(contingency)
 ```
 
 ## U.S. vaccinations rates over time
@@ -104,9 +122,9 @@ for(col in names(data)) {
 
 ## Difference in overall proportions between public and private schools
 
-There is no credible difference in overall reporting between public and private schools.
-
 ### Frequentist t-test
+
+The frequentist null hypothesis states there are no difference in proportions between the public and private schools. The associated alternative hypothesis, suggests there exists a significant difference in proportions. Using the Welch two sample t-test, the corresponding critical value 2.2e-16 < 0.05 = alpha value. This signifies a significant difference in proportions between public and private school.
 
 ```{r}
 t.test(
@@ -117,6 +135,8 @@ t.test(
 
 ### Bayes Factor (with HDI)
 
+The Bayesian HDI is a 95% density region, where points within this region are more credible than the remaining 5% distributed among the tails. Specifically, the interval spans (-8.99e-06, 9.18e-06). Since this interval overlaps zero, there no credible evidence suggesting a mean difference between the report status of public and private school.
+
 ```{r}
 library('BEST')
 library('BayesFactor')
@@ -126,14 +146,14 @@ schoolReportOut = BESTmcmc(
   allSchoolsReportStatus['reported'][allSchoolsReportStatus$pubpriv=='PRIVATE', 1],
   numSavedSteps=1000
 )
-
-summary(schoolReportOut)
 plot(schoolReportOut)
 ```
 
 ## Overall vaccination rates between public and private schools
 
 ### Frequentist: t-test
+
+The frequentist null hypothesis states there are no difference in proportions between the overall vaccination rates between public and private schools. The associated alternative hypothesis, suggests there exists a significant difference in proportions. Using the Welch two sample t-test, a critical value 0.085 > 0.05 = alpha value. Therefore, there is insufficient evidence to reject the null hypothesis.
 
 ```{r}
 t.test(
@@ -144,6 +164,8 @@ t.test(
 
 ### Bayes Factor
 
+The bayes factor provides an odds ratio in favor of the alternative hypothesis, namely there is a difference in proportions between the overall vaccination rates. In the below case, the odds ratio is 0.813:1 in favor of the alternative hypothesis. This suggests an inverted 1/0.813 => 1:1.23 ratio in favor of the null hypothesis. Though this ratio is greater than 1, it is significantly less than 3, and not worth mentioning.
+
 ```{r}
 allVacsOut = anovaBF(
   formula = allvaccs ~ pubpriv,
@@ -152,10 +174,17 @@ allVacsOut = anovaBF(
 summary(allVacsOut)
 mcmcOut = posterior(allVacsOut, iterations=1000)
 summary(mcmcOut)
+```
+
+Furthermore, the corresponding traceplot visually indicates some spikes at roughly 375, and almost 900. These outliers suggest that the markov chain monte carlo (MCMC), may not have converged. Thus using higher `iterations` could produce better results. However, the associated density curve, indicates a roughly normal distribution with no outliers.
+
+```{r}
 plot(mcmcOut[,'mu'])
 ```
 
 ### HDI
+
+The Bayesian HDI is a 95% density region, where points within this region are more credible than the remaining 5% distributed among the tails. Specifically, the interval spans (0, 200). Since this interval includes zero, there no credible evidence suggesting a mean difference between the report status of public and private school.
 
 ```{r}
 hist(mcmcOut)
@@ -167,6 +196,8 @@ abline(v=quantile(mcmcOut, c(0.975)), col='green')
 
 ### Frequentist: t-test
 
+The frequentist null hypothesis states there are no difference in proportions of medical exemptions between public and private schools. The associated alternative hypothesis, suggests there exists a significant difference in proportions. Using the Welch two sample t-test, a critical value 0.2774 > 0.05 = alpha value. Therefore, there is insufficient evidence to reject the null hypothesis.
+
 ```{r}
 t.test(
   x=reportSample$medical[reportSample$pubpriv == 'PUBLIC'],
@@ -176,6 +207,8 @@ t.test(
 
 ### Bayes Factor
 
+The bayes factor provides an odds ratio in favor of the alternative hypothesis, namely there is a difference in proportions of medical exemptions between public and private schools. In the below case, the odds ratio is 0.179:1 in favor of the alternative hypothesis. This suggests an inverted 1/0.179 => 5.5:1 ratio in favor of the null hypothesis.
+
 ```{r}
 medicalExOut = anovaBF(
   formula = medical ~ pubpriv,
@@ -184,10 +217,17 @@ medicalExOut = anovaBF(
 summary(medicalExOut)
 mcmcOut = posterior(medicalExOut, iterations=1000)
 summary(mcmcOut)
+```
+
+Furthermore, the corresponding traceplot visually indicates some spikes at roughly 400, 700, and almost 900. These outliers suggest that the markov chain monte carlo (MCMC), may not have converged. Thus using higher `iterations` could produce better results. However, the associated density curve indicates a mostly normal distribution, while the central mode area curving slightly.
+
+```{r}
 plot(mcmcOut[,'mu'])
 ```
 
 ### HDI
+
+The Bayesian HDI is a 95% density region, where points within this region are more credible than the remaining 5% distributed among the tails. In the below diagram, the interval includes zero, suggesting no credible evidence for a mean difference of medical exemptions between public and private schools.
 
 ```{r}
 hist(mcmcOut)
@@ -199,6 +239,8 @@ abline(v=quantile(mcmcOut, c(0.975)), col='green')
 
 ### Frequentist: t-test
 
+The frequentist null hypothesis states there are no difference in proportions of religious/belief exemptions between public and private schools. The associated alternative hypothesis, suggests there exists a significant difference in proportions. Using the Welch two sample t-test, a critical value 0.125 > 0.05 = alpha value. Therefore, there is insufficient evidence to reject the null hypothesis.
+
 ```{r}
 t.test(
   x=reportSample$religious[reportSample$pubpriv == 'PUBLIC'],
@@ -208,6 +250,8 @@ t.test(
 
 ### Bayes Factor
 
+The bayes factor provides an odds ratio in favor of the alternative hypothesis, namely there is a difference in proportions of religious/belief exemptions between public and private schools. In the below case, the odds ratio is 0.442:1 in favor of the alternative hypothesis. This suggests an inverted 1/0.442 => 2.262:1 ratio in favor of the null hypothesis. Though this ratio is greater than 1, it is less than 3, and not worth mentioning.
+
 ```{r}
 religiousOut = anovaBF(
   formula = religious ~ pubpriv,
@@ -216,10 +260,17 @@ religiousOut = anovaBF(
 summary(religiousOut)
 mcmcOut = posterior(religiousOut, iterations=1000)
 summary(mcmcOut)
+```
+
+Furthermore, the corresponding traceplot visually indicates some spikes at roughly 200, 250, 600, 900. These outliers suggest that the markov chain monte carlo (MCMC), may not have converged. Thus using higher `iterations` could produce better results. Furthermore, the associated density curve indicates a mostly normal distribution with a slighlty distorted peak.
+
+```{r}
 plot(mcmcOut[,'mu'])
 ```
 
 ### HDI
+
+The Bayesian HDI is a 95% density region, where points within this region are more credible than the remaining 5% distributed among the tails. In the below diagram, the interval includes zero, suggesting no credible evidence for a mean difference of religious/belief exemptions between public and private schools.
 
 ```{r}
 hist(mcmcOut)
