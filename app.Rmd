@@ -164,7 +164,7 @@ t.test(
 
 ### Bayes Factor
 
-The bayes factor provides an odds ratio in favor of the alternative hypothesis, namely there is a difference in proportions between the overall vaccination rates. In the below case, the odds ratio is 0.813:1 in favor of the alternative hypothesis. This suggests an inverted 1/0.813 => 1:1.23 ratio in favor of the null hypothesis. Though this ratio is greater than 1, it is significantly less than 3, and not worth mentioning.
+The bayes factor provides an odds ratio in favor of the alternative hypothesis, namely there is a difference in proportions between the overall vaccination rates. In the below case, the odds ratio is 0.813:1 in favor of the alternative hypothesis. This suggests an inverted 1/0.813 => 1.23:1 ratio in favor of the null hypothesis. Though this ratio is greater than 1, it is significantly less than 3, and not worth mentioning.
 
 ```{r}
 allVacsOut = anovaBF(
@@ -341,6 +341,49 @@ mean(rsquared)
 quantile(rsquared, c(0.025))
 quantile(rsquared, c(0.975))
 ```
+
+Both approaches indicate a fairly strong relationship between the dependent variable (conditional), with its associated independent variables.
+
+In an attempt to investigate the above coefficients, a chi-squared test was implemented to determine whether one variable influences another. The corresponding chi-squared test shows that `polMiss`, and `mmrMiss` are not significant, and may be related:
+
+```{r}
+anova(conditional, test='Chisq')
+```
+
+### Predict medical percentage
+
+The following linear regression indicates that each independent variable, except `varMiss` is not statistically significant at an alpha = 0.05. Moreover, the general p-value = `1.995e-10` suggests that the overall model is statistically significant:
+
+```{r}
+conditional = lm(
+  medical ~ dptMiss + polMiss + mmrMiss + hepMiss + varMiss,
+  data = reportSample
+)
+summary(conditional)
+```
+
+When running the equivalent bayes factor, the posterior HDI indicates only `hepMiss` (0.01741, 0.14185) does not overlap zero. This indicates a majority of variables have B-weights that do no credibly differ from zero:
+
+```{r}
+bf.conditional = lmBF(
+  data = reportSample,
+  medical ~ dptMiss + polMiss + mmrMiss + hepMiss + varMiss,
+  posterior = TRUE,
+  iterations = 1000
+)
+summary(bf.conditional)
+```
+
+Furthemore, the bayes r-squared `0.07022636` is larger than `0.07505` from the conventional analysis:
+
+```{r}
+rsquared = 1 - (bf.conditional[, 'sig2'] / var(reportSample$medical))
+mean(rsquared)
+quantile(rsquared, c(0.025))
+quantile(rsquared, c(0.975))
+```
+
+However, both approaches indicate that the model does not predict well between the dependent variable (medical), with its associated independent variables.
 
 In an attempt to investigate the above coefficients, a chi-squared test was implemented to determine whether one variable influences another. The corresponding chi-squared test shows that `polMiss`, and `mmrMiss` are not significant, and may be related:
 
