@@ -158,9 +158,9 @@ plot(mcmcOut[,'mu'])
 ### HDI
 
 ```{r}
-hist(mcmcOut[,'allvaccs'])
-abline(v=quantile(mcmcOut[,'allvaccs'], c(0.025)), col='green')
-abline(v=quantile(mcmcOut[,'allvaccs'], c(0.975)), col='green')
+hist(mcmcOut)
+abline(v=quantile(mcmcOut, c(0.025)), col='green')
+abline(v=quantile(mcmcOut, c(0.975)), col='green')
 ```
 
 ## Medical exemptions between public and private schools
@@ -190,9 +190,9 @@ plot(mcmcOut[,'mu'])
 ### HDI
 
 ```{r}
-hist(mcmcOut[,'medical'])
-abline(v=quantile(mcmcOut[,'medical'], c(0.025)), col='green')
-abline(v=quantile(mcmcOut[,'medical'], c(0.975)), col='green')
+hist(mcmcOut)
+abline(v=quantile(mcmcOut, c(0.025)), col='green')
+abline(v=quantile(mcmcOut, c(0.975)), col='green')
 ```
 
 ## Religious/belief exemptions between public and private schools
