@@ -342,9 +342,9 @@ quantile(rsquared, c(0.025))
 quantile(rsquared, c(0.975))
 ```
 
-Both approaches indicate a fairly strong relationship between the dependent variable (conditional), with its associated independent variables.
+Both approaches indicate a fairly strong relationship between the dependent variable (conditional), with the associated independent variables.
 
-In an attempt to investigate the above coefficients, a chi-squared test was implemented to determine whether one variable influences another. The corresponding chi-squared test shows that `polMiss`, and `mmrMiss` are not significant, and may be related:
+In an attempt to investigate the above coefficients, a chi-squared test was implemented as an omnibus test. The corresponding chi-squared test shows that `polMiss`, and `mmrMiss` are not statistically significant:
 
 ```{r}
 anova(conditional, test='Chisq')
@@ -374,7 +374,7 @@ bf.conditional = lmBF(
 summary(bf.conditional)
 ```
 
-Furthemore, the bayes r-squared `0.07022636` is larger than `0.07505` from the conventional analysis:
+Furthemore, the bayes r-squared `0.07022636` is smaller than `0.07505` from the conventional analysis:
 
 ```{r}
 rsquared = 1 - (bf.conditional[, 'sig2'] / var(reportSample$medical))
@@ -383,9 +383,50 @@ quantile(rsquared, c(0.025))
 quantile(rsquared, c(0.975))
 ```
 
-However, both approaches indicate that the model does not predict well between the dependent variable (medical), with its associated independent variables.
+However, both approaches indicate that the model does not predict a relationship between the dependent variable (medical), with the associated independent variables.
 
-In an attempt to investigate the above coefficients, a chi-squared test was implemented to determine whether one variable influences another. The corresponding chi-squared test shows that `polMiss`, and `mmrMiss` are not significant, and may be related:
+In an attempt to investigate the above coefficients, a chi-squared test was implemented as an omnibus test. The corresponding chi-squared test shows that `polMiss`, and `mmrMiss` are not statistically significant:
+
+```{r}
+anova(conditional, test='Chisq')
+```
+
+### Predict religious percentage
+
+The following linear regression indicates `polMiss`, `mmrMiss`, and the corresponding intercept is not statistically significant at an alpha = 0.05. Moreover, the general p-value = `2.2e-16` suggests that the overall model is statistically significant:
+
+```{r}
+conditional = lm(
+  religious ~ dptMiss + polMiss + mmrMiss + hepMiss + varMiss,
+  data = reportSample
+)
+summary(conditional)
+```
+
+When running the equivalent bayes factor, the posterior HDI indicates only `polMiss` (-0.03557, 0.2612), `mmrMiss` (-0.11431, 0.0825) does overlap zero.  This indicates that the B-weights credibly differ from zero:
+
+```{r}
+bf.conditional = lmBF(
+  data = reportSample,
+  religious ~ dptMiss + polMiss + mmrMiss + hepMiss + varMiss,
+  posterior = TRUE,
+  iterations = 1000
+)
+summary(bf.conditional)
+```
+
+Furthemore, the bayes r-squared `0.7571835` is smaller than `0.7599` from the conventional analysis:
+
+```{r}
+rsquared = 1 - (bf.conditional[, 'sig2'] / var(reportSample$religious))
+mean(rsquared)
+quantile(rsquared, c(0.025))
+quantile(rsquared, c(0.975))
+```
+
+Both approaches indicate a fairly strong relationship between the dependent variable (religious), with the associated independent variables.
+
+In an attempt to investigate the above coefficients, a chi-squared test was implemented as an omnibus test. The corresponding chi-squared test shows that all variables were statistically significant:
 
 ```{r}
 anova(conditional, test='Chisq')
