@@ -290,7 +290,7 @@ reportAdjustedSample$pubpriv = as.numeric(reportAdjustedSample$pubpriv) - 1
 pubpriv = glm(
   pubpriv ~ conditional + medical + religious,
   data = reportAdjustedSample,
-  family = 'binomial'
+  family = binomial()
 )
 summary(pubpriv)
 ```
@@ -301,7 +301,7 @@ The results logistic model have the following log odds results:
 * for every unit change in medical, the log odds of predicting a public school reporting vaccination changes by `-0.035439`.
 * for every unit change in religious, the log odds of predicting a public school reporting vaccination changes by `0.0993`.
 
-Moreover, each independent variable is found not significant. The religious independent variable had the lowest with `0.0993` > `0.05` = alpha level. This signifies that 
+Moreover, each independent variable is found not significant. The religious independent variable had the lowest with `0.0993` > `0.05` = alpha level.
 
 Additionally, the residuals vs. fitted plot indicate the the public school being overpredicted. This signifies highly positive residuals (as indicated above `666.6`), and generally a poor logistic regression. The corresponding Normal Q-Q plot does not provide much information other than ressembling the logistic pattern.
 
@@ -309,6 +309,44 @@ Additionally, the residuals vs. fitted plot indicate the the public school being
 plot(pubpriv)
 ```
 
+### Predict conditional percentage
+
+The following linear regression indicates that each independent variable, except `hepMiss` is statistically significant at an alpha = 0.05. Moreover, the general p-value = `2.2e-16` suggests that the overall model is statistically significant:
+
+```{r}
+conditional = lm(
+  conditional ~ dptMiss + polMiss + mmrMiss + hepMiss + varMiss,
+  data = reportSample
+)
+summary(conditional)
+```
+
+When running the equivalent bayes factor, the posterior HDI indicates only `hepMiss` (-0.4065, 0.00463) overlaps zero. This indicates that the B-weights credibly differ from zero:
+
+```{r}
+bf.conditional = lmBF(
+  data = reportSample,
+  conditional ~ dptMiss + polMiss + mmrMiss + hepMiss + varMiss,
+  posterior = TRUE,
+  iterations = 1000
+)
+summary(bf.conditional)
+```
+
+Furthemore, the bayes r-squared `0.718931` is less than `0.7227` from the conventional analysis:
+
+```{r}
+rsquared = 1 - (bf.conditional[, 'sig2'] / var(reportSample$conditional))
+mean(rsquared)
+quantile(rsquared, c(0.025))
+quantile(rsquared, c(0.975))
+```
+
+In an attempt to investigate the above coefficients, a chi-squared test was implemented to determine whether one variable influences another. The corresponding chi-squared test shows that `polMiss`, and `mmrMiss` are not significant, and may be related:
+
+```{r}
+anova(conditional, test='Chisq')
+```
 
 ## Sources
 
