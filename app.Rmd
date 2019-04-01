@@ -277,3 +277,39 @@ hist(mcmcOut)
 abline(v=quantile(mcmcOut, c(0.025)), col='green')
 abline(v=quantile(mcmcOut, c(0.975)), col='green')
 ```
+
+## Predictive Analyses
+
+### Predict public or private
+
+Predicting a bivariate condition is possible using the logistic regression. By ensuring the dependent variable is a `factor`, and the `glm` function can be implemented:
+
+```{r}
+reportAdjustedSample = reportSample
+reportAdjustedSample$pubpriv = as.numeric(reportAdjustedSample$pubpriv) - 1
+pubpriv = glm(
+  pubpriv ~ conditional + medical + religious,
+  data = reportAdjustedSample,
+  family = 'binomial'
+)
+summary(pubpriv)
+```
+
+The results logistic model have the following log odds results:
+
+* for every unit change in conditional, the log odds of predicting a public school reporting vaccination changes by `-0.009361`.
+* for every unit change in medical, the log odds of predicting a public school reporting vaccination changes by `-0.035439`.
+* for every unit change in religious, the log odds of predicting a public school reporting vaccination changes by `0.0993`.
+
+Moreover, each independent variable is found not significant. The religious independent variable had the lowest with `0.0993` > `0.05` = alpha level. This signifies that 
+
+Additionally, the residuals vs. fitted plot indicate the the public school being overpredicted. This signifies highly positive residuals (as indicated above `666.6`), and generally a poor logistic regression. The corresponding Normal Q-Q plot does not provide much information other than ressembling the logistic pattern.
+
+```{r}
+plot(pubpriv)
+```
+
+
+## Sources
+
+* https://freakonometrics.hypotheses.org/8210
