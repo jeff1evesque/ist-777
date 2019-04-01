@@ -164,7 +164,7 @@ t.test(
 
 ### Bayes Factor
 
-The bayes factor provides an odds ratio in favor of the alternative hypothesis, namely there is a difference in proportions between the overall vaccination rates. In the below case, the odds ratio is 0.813:1 in favor of the alternative hypothesis. This suggests an inverted 1/0.813 => 1:1.23 ratio in favor of the null hypothesis. Though this ratio is greater than 1, it is significantly less than 3, and not worth mentioning.
+The bayes factor provides an odds ratio in favor of the alternative hypothesis, namely there is a difference in proportions between the overall vaccination rates. In the below case, the odds ratio is 0.813:1 in favor of the alternative hypothesis. This suggests an inverted 1/0.813 => 1.23:1 ratio in favor of the null hypothesis. Though this ratio is greater than 1, it is significantly less than 3, and not worth mentioning.
 
 ```{r}
 allVacsOut = anovaBF(
@@ -277,3 +277,165 @@ hist(mcmcOut)
 abline(v=quantile(mcmcOut, c(0.025)), col='green')
 abline(v=quantile(mcmcOut, c(0.975)), col='green')
 ```
+
+## Predictive Analyses
+
+### Predict public or private
+
+Predicting a bivariate condition is possible using the logistic regression. By ensuring the dependent variable is a `factor`, and the `glm` function can be implemented:
+
+```{r}
+reportAdjustedSample = reportSample
+reportAdjustedSample$pubpriv = as.numeric(reportAdjustedSample$pubpriv) - 1
+pubpriv = glm(
+  pubpriv ~ conditional + medical + religious,
+  data = reportAdjustedSample,
+  family = binomial()
+)
+summary(pubpriv)
+```
+
+The results logistic model have the following log odds results:
+
+* for every unit change in conditional, the log odds of predicting a public school reporting vaccination changes by `-0.009361`.
+* for every unit change in medical, the log odds of predicting a public school reporting vaccination changes by `-0.035439`.
+* for every unit change in religious, the log odds of predicting a public school reporting vaccination changes by `0.0993`.
+
+Moreover, each independent variable is found not significant. The religious independent variable had the lowest with `0.0993` > `0.05` = alpha level.
+
+Additionally, the residuals vs. fitted plot indicate the the public school being overpredicted. This signifies highly positive residuals (as indicated above `666.6`), and generally a poor logistic regression. The corresponding Normal Q-Q plot does not provide much information other than ressembling the logistic pattern.
+
+```{r}
+plot(pubpriv)
+```
+
+### Predict conditional percentage
+
+The following linear regression indicates that each independent variable, except `hepMiss` is statistically significant at an alpha = 0.05. Moreover, the general p-value = `2.2e-16` suggests that the overall model is statistically significant:
+
+```{r}
+conditional = lm(
+  conditional ~ dptMiss + polMiss + mmrMiss + hepMiss + varMiss,
+  data = reportSample
+)
+summary(conditional)
+```
+
+When running the equivalent bayes factor, the posterior HDI indicates only `hepMiss` (-0.4065, 0.00463) overlaps zero. This indicates that the B-weights credibly differ from zero:
+
+```{r}
+bf.conditional = lmBF(
+  data = reportSample,
+  conditional ~ dptMiss + polMiss + mmrMiss + hepMiss + varMiss,
+  posterior = TRUE,
+  iterations = 1000
+)
+summary(bf.conditional)
+```
+
+Furthemore, the bayes r-squared `0.718931` is less than `0.7227` from the conventional analysis:
+
+```{r}
+rsquared = 1 - (bf.conditional[, 'sig2'] / var(reportSample$conditional))
+mean(rsquared)
+quantile(rsquared, c(0.025))
+quantile(rsquared, c(0.975))
+```
+
+Both approaches indicate a fairly strong relationship between the dependent variable (conditional), with the associated independent variables.
+
+In an attempt to investigate the above coefficients, a chi-squared test was implemented as an omnibus test. The corresponding chi-squared test shows that `polMiss`, and `mmrMiss` are not statistically significant:
+
+```{r}
+anova(conditional, test='Chisq')
+```
+
+### Predict medical percentage
+
+The following linear regression indicates that each independent variable, except `varMiss` is not statistically significant at an alpha = 0.05. Moreover, the general p-value = `1.995e-10` suggests that the overall model is statistically significant:
+
+```{r}
+conditional = lm(
+  medical ~ dptMiss + polMiss + mmrMiss + hepMiss + varMiss,
+  data = reportSample
+)
+summary(conditional)
+```
+
+When running the equivalent bayes factor, the posterior HDI indicates only `hepMiss` (0.01741, 0.14185) does not overlap zero. This indicates a majority of variables have B-weights that do no credibly differ from zero:
+
+```{r}
+bf.conditional = lmBF(
+  data = reportSample,
+  medical ~ dptMiss + polMiss + mmrMiss + hepMiss + varMiss,
+  posterior = TRUE,
+  iterations = 1000
+)
+summary(bf.conditional)
+```
+
+Furthemore, the bayes r-squared `0.07022636` is smaller than `0.07505` from the conventional analysis:
+
+```{r}
+rsquared = 1 - (bf.conditional[, 'sig2'] / var(reportSample$medical))
+mean(rsquared)
+quantile(rsquared, c(0.025))
+quantile(rsquared, c(0.975))
+```
+
+However, both approaches indicate that the model does not predict a relationship between the dependent variable (medical), with the associated independent variables.
+
+In an attempt to investigate the above coefficients, a chi-squared test was implemented as an omnibus test. The corresponding chi-squared test shows that `polMiss`, and `mmrMiss` are not statistically significant:
+
+```{r}
+anova(conditional, test='Chisq')
+```
+
+### Predict religious percentage
+
+The following linear regression indicates `polMiss`, `mmrMiss`, and the corresponding intercept is not statistically significant at an alpha = 0.05. Moreover, the general p-value = `2.2e-16` suggests that the overall model is statistically significant:
+
+```{r}
+conditional = lm(
+  religious ~ dptMiss + polMiss + mmrMiss + hepMiss + varMiss,
+  data = reportSample
+)
+summary(conditional)
+```
+
+When running the equivalent bayes factor, the posterior HDI indicates only `polMiss` (-0.03557, 0.2612), `mmrMiss` (-0.11431, 0.0825) does overlap zero.  This indicates that the B-weights credibly differ from zero:
+
+```{r}
+bf.conditional = lmBF(
+  data = reportSample,
+  religious ~ dptMiss + polMiss + mmrMiss + hepMiss + varMiss,
+  posterior = TRUE,
+  iterations = 1000
+)
+summary(bf.conditional)
+```
+
+Furthemore, the bayes r-squared `0.7571835` is smaller than `0.7599` from the conventional analysis:
+
+```{r}
+rsquared = 1 - (bf.conditional[, 'sig2'] / var(reportSample$religious))
+mean(rsquared)
+quantile(rsquared, c(0.025))
+quantile(rsquared, c(0.975))
+```
+
+Both approaches indicate a fairly strong relationship between the dependent variable (religious), with the associated independent variables.
+
+In an attempt to investigate the above coefficients, a chi-squared test was implemented as an omnibus test. The corresponding chi-squared test shows that all variables were statistically significant:
+
+```{r}
+anova(conditional, test='Chisq')
+```
+
+## Big picture
+
+## Sources
+
+* https://freakonometrics.hypotheses.org/8210
+* https://stats.idre.ucla.edu/r/dae/logit-regression/
+* https://statistics.laerd.com/statistical-guides/one-way-anova-statistical-guide.php
