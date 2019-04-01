@@ -20,7 +20,7 @@ devtools::install_local(paste0(cwd, '/packages/customUtility'))
 library('customUtility')
 
 ## load packages
-load_package(c('knitr', 'rmarkdown'))
+load_package(c('knitr', 'rmarkdown', 'BEST'))
 
 ## load dataset
 allSchoolsReportStatus = read.csv(paste0(cwd, '/data/allSchoolsReportStatus.csv'))
@@ -28,7 +28,7 @@ reportSample = read.csv(paste0(cwd, '/data/reportSample.csv'))
 usVaccines = read.csv(paste0(cwd, '/data/usVaccines.csv'))
 ```
 
-The combined proportion of private and public schools reporting vaccination data:
+## Proportion of overall schools reported vaccination data
 
 ```{r}
 library('ggplot2')
@@ -38,8 +38,7 @@ ggplot(
 ) +
 geom_histogram(stat='count')
 ```
-
-The proportion of private and public schools reporting vaccination data:
+## Proportion of public and private schools reported vaccination data
 
 ```{r}
 library('ggplot2')
@@ -50,6 +49,8 @@ ggplot(
 facet_grid(~pubpriv) +
 geom_histogram(stat='count')
 ```
+
+## U.S. vaccinations rates over time
 
 Most vaccinations have stabilized. However, it appears that `HepB_BD` vacinations started much recently, and may require additional time to stabilize:
 
@@ -63,6 +64,8 @@ ggplot(
 ```
 
 In general the vacination rates reported by the World Health Organization for the United States, have a tendency to fluctuate initially. After some time, the rates seem to stabilize between 85 and 100. Furthermore, the `HepB_BD` rates does not show similar values, nor stability. Rather, the vacination endured a large growth period, then a decline. It is unknown whether the rates have stabilized, or future volatility could occur.
+
+## Notable patterns in U.S. vaccinations rates over time
 
 When using time series decomposition, with a `frequency=4`, there appears to be seasonal patterns for all vacination types. However, the trends are not consistent nor similar between the different vacination types.
 
@@ -95,4 +98,131 @@ for(col in names(data)) {
   data.decompose = decompose(data.ts, 'additive')
   plot.decomposed.ts(data.decompose, col)
 }
+```
+
+# Public vs. Private School Comparisons
+
+## Difference in overall proportions between public and private schools
+
+There is no credible difference in overall reporting between public and private schools.
+
+### Frequentist t-test
+
+```{r}
+t.test(
+  x=allSchoolsReportStatus[allSchoolsReportStatus$pubpriv=='PUBLIC', 1],
+  y=allSchoolsReportStatus[allSchoolsReportStatus$pubpriv=='PRIVATE', 1]
+)
+```
+
+### Bayes Factor (with HDI)
+
+```{r}
+library('BEST')
+library('BayesFactor')
+
+schoolReportOut = BESTmcmc(
+  allSchoolsReportStatus['reported'][allSchoolsReportStatus$pubpriv=='PUBLIC', 1],
+  allSchoolsReportStatus['reported'][allSchoolsReportStatus$pubpriv=='PRIVATE', 1],
+  numSavedSteps=1000
+)
+
+summary(schoolReportOut)
+plot(schoolReportOut)
+```
+
+## Overall vaccination rates between public and private schools
+
+### Frequentist: t-test
+
+```{r}
+t.test(
+  x=reportSample$allvaccs[reportSample$pubpriv == 'PUBLIC'],
+  y=reportSample$allvaccs[reportSample$pubpriv == 'PRIVATE']
+)
+```
+
+### Bayes Factor
+
+```{r}
+allVacsOut = anovaBF(
+  formula = allvaccs ~ pubpriv,
+  data=reportSample
+)
+summary(allVacsOut)
+mcmcOut = posterior(allVacsOut, iterations=1000)
+summary(mcmcOut)
+plot(mcmcOut[,'mu'])
+```
+
+### HDI
+
+```{r}
+hist(mcmcOut)
+abline(v=quantile(mcmcOut, c(0.025)), col='green')
+abline(v=quantile(mcmcOut, c(0.975)), col='green')
+```
+
+## Medical exemptions between public and private schools
+
+### Frequentist: t-test
+
+```{r}
+t.test(
+  x=reportSample$medical[reportSample$pubpriv == 'PUBLIC'],
+  y=reportSample$medical[reportSample$pubpriv == 'PRIVATE']
+)
+```
+
+### Bayes Factor
+
+```{r}
+medicalExOut = anovaBF(
+  formula = medical ~ pubpriv,
+  data=reportSample
+)
+summary(medicalExOut)
+mcmcOut = posterior(medicalExOut, iterations=1000)
+summary(mcmcOut)
+plot(mcmcOut[,'mu'])
+```
+
+### HDI
+
+```{r}
+hist(mcmcOut)
+abline(v=quantile(mcmcOut, c(0.025)), col='green')
+abline(v=quantile(mcmcOut, c(0.975)), col='green')
+```
+
+## Religious/belief exemptions between public and private schools
+
+### Frequentist: t-test
+
+```{r}
+t.test(
+  x=reportSample$religious[reportSample$pubpriv == 'PUBLIC'],
+  y=reportSample$religious[reportSample$pubpriv == 'PRIVATE']
+)
+```
+
+### Bayes Factor
+
+```{r}
+religiousOut = anovaBF(
+  formula = religious ~ pubpriv,
+  data=reportSample
+)
+summary(religiousOut)
+mcmcOut = posterior(religiousOut, iterations=1000)
+summary(mcmcOut)
+plot(mcmcOut[,'mu'])
+```
+
+### HDI
+
+```{r}
+hist(mcmcOut)
+abline(v=quantile(mcmcOut, c(0.025)), col='green')
+abline(v=quantile(mcmcOut, c(0.975)), col='green')
 ```
